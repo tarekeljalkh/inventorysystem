@@ -79,10 +79,13 @@
                 </div>
                 <hr>
                 <div class="text-md-right">
-                            <form action="{{ route('return_to_stock', $checkout->id) }}" method="POST" style="display:inline-block;">
-                                @csrf
-                                <button type="submit" class="btn btn-warning return-to-stock">Return to Stock</button>
-                            </form>
+                    @if (!$checkout->return_date)
+                        <form action="{{ route('return_to_stock', $checkout->id) }}" method="POST"
+                            style="display:inline-block;">
+                            @csrf
+                            <button type="submit" class="btn btn-warning return-to-stock">Return to Stock</button>
+                        </form>
+                    @endif
 
                     <button class="btn btn-primary btn-icon icon-left" onclick="window.print()"><i class="fas fa-print"></i>
                         Print</button>
@@ -98,7 +101,8 @@
                 visibility: hidden;
             }
 
-            .invoice-print, .invoice-print * {
+            .invoice-print,
+            .invoice-print * {
                 visibility: visible;
             }
 
@@ -106,8 +110,10 @@
                 position: absolute;
                 left: 0;
                 top: 0;
-                width: 210mm; /* A4 width */
-                height: 297mm; /* A4 height */
+                width: 210mm;
+                /* A4 width */
+                height: 297mm;
+                /* A4 height */
             }
         }
     </style>

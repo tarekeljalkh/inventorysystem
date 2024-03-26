@@ -2,48 +2,49 @@
 
 namespace App\Livewire;
 
+use App\Models\Checkout;
 use App\Models\Client;
 use App\Models\Item;
 use Livewire\Component;
+use Illuminate\Support\Facades\DB;
+use Exception;
 
 class PointOfSale extends Component
 {
     public $items = [];
     public $cart = [];
-    public $search = ''; // New property for search query
+    public $search = '';
+    //public $selectedClient; // Make sure this is bound to your client selection input
+    public $selectedClient = 1; // i made it 1 because the default for the selectbox
 
     public function mount()
     {
-        $this->items = Item::where('quantity', '>', 0)->get(); // Load initial items
+        // Load items with original quantity from database
+        $this->items = Item::where('quantity', '>', 0)->get()->toArray();
     }
 
     public function addToCart($itemId)
     {
-        $item = $this->items->find($itemId);
+        // Find the item in the local state
+        $key = array_search($itemId, array_column($this->items, 'id'));
+        $item = &$this->items[$key];
 
-        // Check if the item exists and has more than 0 quantity
-        if ($item && $item->quantity > 0) {
+        // Check if the item exists and has more than 0 quantity in the local state
+        if ($item && $item['quantity'] > 0) {
             if (isset($this->cart[$itemId])) {
                 $this->cart[$itemId]['quantity']++;
             } else {
                 $this->cart[$itemId] = [
-                    'id' => $item->id,
-                    'name' => $item->name,
+                    'id' => $item['id'],
+                    'name' => $item['name'],
                     'quantity' => 1
                 ];
             }
 
-            // Decrement the item quantity
-            $item->decrement('quantity');
-            // You can optionally save the changes to the database if needed
-
-            $this->render(); // Re-render the component
+            // Decrement the item quantity in the local state
+            $item['quantity']--;
+            $this->render();
         }
-    }
-
-    public function loadClients()
-    {
-        return Client::all(); // Assuming Client is your model for clients
     }
 
     public function removeFromCart($itemId)
@@ -54,18 +55,59 @@ class PointOfSale extends Component
             } else {
                 unset($this->cart[$itemId]);
             }
-            // Increment the item quantity in the list of items
-            $this->items->find($itemId)->increment('quantity');
-            $this->render(); // Re-render the component
+
+            // Increment the item quantity in the local state
+            $key = array_search($itemId, array_column($this->items, 'id'));
+            $this->items[$key]['quantity']++;
+            $this->render();
         }
     }
 
     public function checkout()
     {
-        // Your checkout logic
+        $this->validate([
+            'selectedClient' => 'required|exists:clients,id',
+            'cart' => 'required|array',
+        ]);
 
-        // Clear the cart
-        $this->cart = [];
+
+        DB::beginTransaction();
+
+        try {
+            $checkout = new Checkout();
+            $checkout->client_id = $this->selectedClient;
+            $checkout->save();
+
+            foreach ($this->cart as $item_id => $cartItem) {
+                $quantity = $cartItem['quantity'];
+
+                if ($quantity > 0) {
+                    $item = Item::find($item_id);
+
+                    if (!$item) {
+                        throw new Exception("Item not found.");
+                    }
+
+                    if ($item->quantity < $quantity) {
+                        throw new Exception("Not enough stock for item {$item->name}.");
+                    }
+
+                    $item->decrement('quantity', $quantity);
+                    $checkout->items()->attach($item_id, ['quantity' => $quantity]);
+                }
+            }
+
+            DB::commit();
+            $this->reset(['cart', 'selectedClient']); // Reset cart and selectedClient after successful checkout
+            //session()->flash('success', 'Checkout successful.');
+            toastr()->success('Checkout Items Successfully');
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            //session()->flash('error', $e->getMessage());
+            toastr()->error($e->getMessage());
+
+        }
     }
 
     public function updateSearch()
@@ -73,16 +115,20 @@ class PointOfSale extends Component
         $this->render(); // Trigger re-rendering of the component
     }
 
+    public function loadClients()
+    {
+        return Client::all();
+    }
+
     public function render()
     {
-        $query = Item::where('quantity', '>', 0);
-
+        $items = collect($this->items);
         if (!empty($this->search)) {
-            $query = $query->where('name', 'like', '%' . $this->search . '%');
+            $items = $items->filter(function ($item) {
+                return false !== stripos($item['name'], $this->search);
+            });
         }
 
-        $items = $query->get();
-
-        return view('livewire.point-of-sale', compact('items'));
+        return view('livewire.point-of-sale', ['items' => $items]);
     }
 }

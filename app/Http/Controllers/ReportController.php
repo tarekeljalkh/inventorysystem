@@ -15,11 +15,17 @@ class ReportController extends Controller
     {
         $checkouts = Checkout::query();
 
-        if ($request->has('date')) {
-            $checkouts->whereDate('created_at', $request->date);
+        // Filter by date range
+        if ($request->filled('start_date')) {
+            $checkouts->whereDate('created_at', '>=', $request->start_date);
         }
 
-        if ($request->has('client_id')) {
+        if ($request->filled('end_date')) {
+            $checkouts->whereDate('created_at', '<=', $request->end_date);
+        }
+
+        // Check if a specific client is selected, otherwise show all
+        if ($request->filled('client_id')) {
             $checkouts->where('client_id', $request->client_id);
         }
 

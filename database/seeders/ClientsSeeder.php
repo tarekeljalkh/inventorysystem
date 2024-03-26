@@ -15,20 +15,26 @@ class ClientsSeeder extends Seeder
     {
         Client::insert([
             [
-                'name' => 'test1',
+                'name' => 'Emile',
                 'mobile' => '53456346',
                 'residency_number' => '4343535'
             ],
             [
-                'name' => 'test2',
+                'name' => 'Tarek',
                 'mobile' => '3242355325',
                 'residency_number' => '23425'
             ],
             [
-                'name' => 'test3',
+                'name' => 'Ali',
+                'mobile' => '345345345',
+                'residency_number' => '23425346'
+            ],
+            [
+                'name' => 'Anthony',
                 'mobile' => '345345345',
                 'residency_number' => '23425346'
             ]
+
         ]);
     }
 }

@@ -6,30 +6,33 @@
                 wire:keydown="updateSearch">
         </div>
 
+
         <!-- Product Grid -->
         <div class="col-md-9"> <!-- Adjusted from col-md-8 to col-md-9 for 3/4 width -->
             <div class="card">
                 <div class="card-header">
-                    <h4>Available Items</h4>
+                    <h4>Products</h4>
                 </div>
                 <div class="card-body">
                     <div class="row">
 
                         @foreach ($items as $item)
-                            <div class="col-md-3 mb-4">
-                                <div class="card h-100" style="cursor: pointer;"
-                                    wire:click="addToCart({{ $item['id'] }})">
-                                    <!-- Center the image by making it block level and using mx-auto for auto margins on both sides -->
-                                    <img style="width:50px; display: block; margin: 0 auto;"
-                                        src="{{ asset($item['image'] ?? 'default-product-image.png') }}"
-                                        class="card-img-top" alt="{{ $item['name'] }}">
-                                    <!-- Use text-center class to center the text content within the card-body -->
-                                    <div class="card-body text-center">
-                                        <h5 class="card-title">{{ $item['name'] }}</h5>
-                                        <p>{{ $item['quantity'] }} Available</p>
+                            @if ($item->quantity > 0 && stripos($item->name, $search) !== false)
+                                <div class="col-md-3 mb-4">
+                                    <div class="card h-100" style="cursor: pointer;"
+                                        wire:click="addToCart({{ $item->id }})">
+                                        <!-- Center the image by making it block level and using mx-auto for auto margins on both sides -->
+                                        <img style="width:50px; display: block; margin: 0 auto;"
+                                            src="{{ asset($item->image) }}" class="card-img-top"
+                                            alt="{{ $item->name }}">
+                                        <!-- Use text-center class to center the text content within the card-body -->
+                                        <div class="card-body text-center">
+                                            <h5 class="card-title">{{ $item->name }}</h5>
+                                            <p>{{ $item->quantity }} Available</p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            @endif
                         @endforeach
 
                     </div>
@@ -62,7 +65,8 @@
                 <div class="card-footer">
                     <h5>Total: {{ count($cart) }} Items</h5>
                     <div class="d-flex">
-                        <select wire:model="selectedClient" class="form-control select2 mr-2" id="clientSelect">
+                        <select wire:model="selectedClient" class="form-control select2 mr-2" id="clientSelect"
+                            {{ count($cart) == 0 ? 'disabled' : '' }}>
                             <option value="" disabled>Select Client</option>
                             @foreach ($this->loadClients() as $client)
                                 <option value="{{ $client->id }}">{{ $client->name }}</option>
@@ -73,6 +77,7 @@
                             Checkout
                         </button>
                     </div>
+                    {{-- <button class="btn btn-success" wire:click="checkout">Checkout</button> --}}
                 </div>
             </div>
         </div>

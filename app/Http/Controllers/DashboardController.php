@@ -17,8 +17,8 @@ class DashboardController extends Controller
         $items = Item::all()->count();
         $clients = Client::all()->count();
         $checkouts = Checkout::notReturnedToStock()->count();
-
-        return view('dashboard', compact('items', 'clients', 'checkouts'));
+        $reports = Checkout::all()->count();
+        return view('dashboard', compact('items', 'clients', 'checkouts', 'reports'));
     }
 
     /**

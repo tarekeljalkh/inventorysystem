@@ -35,9 +35,9 @@
                                         value="{{ request('end_date') }}">
                                 </div>
                                 <div class="form-group col-md-4">
-                                    <label for="client_id">Client:</label>
+                                    <label for="client_id">Select Client:</label>
                                     <select id="client_id" name="client_id" class="form-control select2">
-                                        <option value="">Select Client</option>
+                                        <option value="">All Clients</option> <!-- Add this line -->
                                         @foreach ($clients as $client)
                                             <option value="{{ $client->id }}"
                                                 @if (request('client_id') == $client->id) selected @endif>
@@ -62,6 +62,7 @@
                                         <th>Items Count</th>
                                         <th>Date</th>
                                         <th>Return Date</th>
+                                        <th>Action</th>
                                         <!-- Add more columns as needed -->
                                     </tr>
                                 </thead>
@@ -85,6 +86,11 @@
                                                 @else
                                                     <span class="badge badge-primary">Not Returned Yet</span>
                                                 @endif
+                                            </td>
+                                            <td>
+                                                <a href="{{ route('checkouts.show', $checkout->id) }}"
+                                                    class="btn btn-info"><i class="fas fa-eye"></i> View</a>
+
                                             </td>
                                             <!-- Add more columns as needed -->
                                         </tr>
