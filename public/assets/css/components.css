@@ -1166,11 +1166,11 @@ tr:first-child > td > .fc-day-grid-event {
   background-image: none !important;
 }
 #toast-container > .toast:before {
-  position: absolute;
+  position: fixed;
   left: 17px;
   top: 25px;
-  font-family: "Ionicons";
-  font-size: 24px;
+  font-family: Font Awesome 5 Free;
+     font-size: 24px;
   line-height: 18px;
   color: #fff;
 }

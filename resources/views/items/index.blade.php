@@ -6,7 +6,7 @@
             <div class="section-header-back">
                 <a href="{{ route('dashboard') }}" class="btn btn-icon"><i class="fas fa-arrow-left"></i></a>
             </div>
-            <h1>Items</h1>
+            <h1>Items ({{ $items->count() }})</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="{{ route('dashboard') }}">Dashboard</a></div>
                 <div class="breadcrumb-item"><a href="#">Items</a></div>
@@ -19,7 +19,7 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
-                            <h4>All Items</h4>
+                            <h4>All Items ({{ $items->count() }})</h4>
                             <div class="card-header-action">
 
                                 <a href="{{ route('items.create') }}" class="btn btn-success">Create New <i

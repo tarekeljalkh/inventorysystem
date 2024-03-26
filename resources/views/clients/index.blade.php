@@ -6,7 +6,7 @@
             <div class="section-header-back">
                 <a href="{{ route('dashboard') }}" class="btn btn-icon"><i class="fas fa-arrow-left"></i></a>
             </div>
-            <h1>Clients</h1>
+            <h1>Clients ({{ $clients->count() }})</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="{{ route('dashboard') }}">Dashboard</a></div>
                 <div class="breadcrumb-item"><a href="#">Clients</a></div>
@@ -18,7 +18,7 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
-                            <h4>All Clients</h4>
+                            <h4>All Clients ({{ $clients->count() }})</h4>
                             <div class="card-header-action">
                                 <a href="{{ route('clients.create') }}" class="btn btn-success">Create New <i
                                         class="fas fa-plus"></i></a>
@@ -26,7 +26,7 @@
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table id="items" class="display nowrap" style="width:100%">
+                                <table id="clients" class="display nowrap" style="width:100%">
                                     <thead>
                                         <tr>
                                             <th>Name</th>
@@ -76,7 +76,7 @@
 
 @push('scripts')
     <script>
-        new DataTable('#items', {
+        new DataTable('#clients', {
             layout: {
                 topStart: {
                     buttons: ['excel', 'pdf', 'print']
