@@ -21,6 +21,22 @@ class Checkout extends Model
         return $this->belongsToMany(Item::class, 'checkout_items')->withPivot('quantity');
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function checkoutItems()
+    {
+        return $this->hasMany(CheckoutItem::class);
+    }
+
+
+    public function returnedBy()
+    {
+        return $this->belongsTo(User::class, 'returned_by_user_id');
+    }
+
     //return orders that are nullable in return date
 
     public function scopeNotReturnedToStock($query)
@@ -29,6 +45,4 @@ class Checkout extends Model
             $query->whereNotNull('return_date');
         });
     }
-
-
 }

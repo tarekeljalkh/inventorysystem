@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -26,7 +27,7 @@ Route::get('/', function () {
 Route::middleware('auth')->group(function () {
 
     //Dashboard route
-    Route::get('/dashboard', [DashboardController::class, 'index'] )->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     //items route
     Route::get('/import-items', [ItemController::class, 'importIndex'])->name('items.import.index');
@@ -36,6 +37,11 @@ Route::middleware('auth')->group(function () {
 
     //Clients route
     Route::resource('clients', ClientController::class);
+
+    //Users route
+    Route::put('/users/{userId}/update-password', [UserController::class, 'updatePassword'])->name('users.password.update');
+    Route::resource('users', UserController::class);
+
 
     //Checkout route
     Route::post('checkouts/{checkout}/return-to-stock', [CheckoutController::class, 'returnToStock'])->name('return_to_stock');

@@ -76,6 +76,7 @@ class PointOfSale extends Component
         try {
             $checkout = new Checkout();
             $checkout->client_id = $this->selectedClient;
+            $checkout->user_id = auth()->id(); // Ensure you have `user_id` in your checkouts table
             $checkout->save();
 
             foreach ($this->cart as $item_id => $cartItem) {

@@ -2,7 +2,6 @@
 
 @section('content')
     <section class="section">
-
         <div class="section-header">
             <div class="section-header-back">
                 <a href="{{ route('dashboard') }}" class="btn btn-icon"><i class="fas fa-arrow-left"></i></a>
@@ -13,7 +12,6 @@
                 <div class="breadcrumb-item"><a href="#">Reports</a></div>
             </div>
         </div>
-
 
         <div class="section-body">
             <div class="col-12">
@@ -26,22 +24,20 @@
                             <div class="row">
                                 <div class="form-group col-md-4">
                                     <label for="start_date">From:</label>
-                                    <input type="date" id="start_date" name="start_date" class="form-control"
-                                        value="{{ request('start_date') }}">
+                                    <input type="date" id="start_date" name="start_date" class="form-control" value="{{ request('start_date') }}">
                                 </div>
                                 <div class="form-group col-md-4">
                                     <label for="end_date">To:</label>
-                                    <input type="date" id="end_date" name="end_date" class="form-control"
-                                        value="{{ request('end_date') }}">
+                                    <input type="date" id="end_date" name="end_date" class="form-control" value="{{ request('end_date') }}">
                                 </div>
                                 <div class="form-group col-md-4">
                                     <label for="client_id">Select Client:</label>
                                     <select id="client_id" name="client_id" class="form-control select2">
-                                        <option value="">All Clients</option> <!-- Add this line -->
+                                        <option value="">All Clients</option>
                                         @foreach ($clients as $client)
-                                            <option value="{{ $client->id }}"
-                                                @if (request('client_id') == $client->id) selected @endif>
-                                                {{ $client->name }}</option>
+                                            <option value="{{ $client->id }}" @if (request('client_id') == $client->id) selected @endif>
+                                                {{ $client->name }}
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -50,20 +46,19 @@
                         </form>
                     </div>
 
-
                     <div class="card-body">
-
                         <div class="table-responsive">
                             <table id="reports" class="display nowrap" style="width:100%">
                                 <thead>
                                     <tr>
                                         <th>ID</th>
                                         <th>Client</th>
+                                        <th>Checkout By</th>
                                         <th>Items Count</th>
                                         <th>Date</th>
+                                        <th>Returned By</th>
                                         <th>Return Date</th>
                                         <th>Action</th>
-                                        <!-- Add more columns as needed -->
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -71,49 +66,39 @@
                                         <tr>
                                             <td>{{ $checkout->id }}</td>
                                             <td>{{ $checkout->client->name }}</td>
+                                            <td>{{ $checkout->user->name }}</td>
                                             <td>
                                                 @foreach ($checkout->items as $item)
-                                                    <span class="badge badge-info">{{ $item->name }}
-                                                        ({{ $item->pivot->quantity }})
-                                                    </span>
+                                                    <span class="badge badge-info">{{ $item->name }} ({{ $item->pivot->quantity }})</span>
                                                 @endforeach
                                             </td>
-
                                             <td>{{ $checkout->created_at->format('d-m-Y') }}</td>
+                                            <td>{{ $checkout->return_date ? $checkout->returnedBy->name : '' }}</td>
+                                            <td>{{ $checkout->return_date ? Carbon\Carbon::parse($checkout->return_date)->format('d-m-Y') : 'Not Returned Yet' }}</td>
                                             <td>
-                                                @if (isset($checkout->return_date))
-                                                    {{ Carbon\Carbon::parse($checkout->return_date)->format('d-m-Y') }}
-                                                @else
-                                                    <span class="badge badge-primary">Not Returned Yet</span>
-                                                @endif
+                                                <a href="{{ route('checkouts.show', $checkout->id) }}" class="btn btn-info"><i class="fas fa-eye"></i> View</a>
                                             </td>
-                                            <td>
-                                                <a href="{{ route('checkouts.show', $checkout->id) }}"
-                                                    class="btn btn-info"><i class="fas fa-eye"></i> View</a>
-
-                                            </td>
-                                            <!-- Add more columns as needed -->
                                         </tr>
                                     @endforeach
                                 </tbody>
                             </table>
                         </div>
                     </div>
-
                 </div>
             </div>
     </section>
 @endsection
 
-
 @push('scripts')
     <script>
-        new DataTable('#reports', {
-            layout: {
-                topStart: {
-                    buttons: ['excel', 'pdf', 'print']
+        $(document).ready(function() {
+            new DataTable('#reports', {
+                layout: {
+                    topStart: {
+                        buttons: ['excel', 'pdf', 'print']
+                    }
                 }
-            }
+            });
         });
     </script>
 @endpush

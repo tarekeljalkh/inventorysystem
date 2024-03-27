@@ -21,13 +21,14 @@
                         <div class="card-header">
                             <h4>All Items ({{ $items->count() }})</h4>
                             <div class="card-header-action">
+                                @if (auth()->user()->role == 'admin')
 
                                 <a href="{{ route('items.create') }}" class="btn btn-success">Create New <i
                                         class="fas fa-plus"></i></a>
 
                                 <a href="{{ route('items.import.index') }}" class="btn btn-info">Import Excel <i
                                         class="fas fa-upload"></i></a>
-
+                                    @endif
                             </div>
                         </div>
                         <div class="card-body">
@@ -38,7 +39,9 @@
                                             <th>Name</th>
                                             <th>Quantity</th>
                                             <th>Image</th>
-                                            <th>Action</th>
+                                            @if (auth()->user()->role == 'admin')
+                                                <th>Action</th>
+                                            @endif
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -50,15 +53,18 @@
                                                     @if ($item->image)
                                                         <img style="width: 50px" src="{{ asset($item->image) }}">
                                                     @else
-                                                        <span class="badge badge-info">No Image</span>
+                                                        <img style="width: 50px" src="{{ asset('uploads/no_image.png') }}">
                                                     @endif
                                                 </td>
-                                                <td>
-                                                    <a href="{{ route('items.edit', $item->id) }}"
-                                                        class="btn btn-primary"><i class="fas fa-pencil-alt"></i></a>
-                                                    <a href="{{ route('items.destroy', $item->id) }}"
-                                                        class="btn btn-danger delete-item"><i class="fas fa-trash"></i></a>
-                                                </td>
+                                                @if (auth()->user()->role == 'admin')
+                                                    <td>
+                                                        <a href="{{ route('items.edit', $item->id) }}"
+                                                            class="btn btn-primary"><i class="fas fa-pencil-alt"></i></a>
+                                                        <a href="{{ route('items.destroy', $item->id) }}"
+                                                            class="btn btn-danger delete-item"><i
+                                                                class="fas fa-trash"></i></a>
+                                                    </td>
+                                                @endif
                                             </tr>
                                         @endforeach
                                     </tbody>

@@ -6,10 +6,10 @@
             <div class="section-header-back">
                 <a href="{{ route('dashboard') }}" class="btn btn-icon"><i class="fas fa-arrow-left"></i></a>
             </div>
-            <h1>Clients ({{ $clients->count() }})</h1>
+            <h1>Users ({{ $users->count() }})</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="{{ route('dashboard') }}">Dashboard</a></div>
-                <div class="breadcrumb-item"><a href="#">Clients</a></div>
+                <div class="breadcrumb-item"><a href="#">Users</a></div>
             </div>
         </div>
 
@@ -18,12 +18,10 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
-                            <h4>All Clients ({{ $clients->count() }})</h4>
+                            <h4>All Users ({{ $users->count() }})</h4>
                             <div class="card-header-action">
-                                @if (auth()->user()->role == 'admin')
-                                    <a href="{{ route('clients.create') }}" class="btn btn-success">Create New <i
-                                            class="fas fa-plus"></i></a>
-                                @endif
+                                <a href="{{ route('users.create') }}" class="btn btn-success">Create New <i
+                                        class="fas fa-plus"></i></a>
                             </div>
                         </div>
                         <div class="card-body">
@@ -32,22 +30,21 @@
                                     <thead>
                                         <tr>
                                             <th>Name</th>
-                                            <th>Mobile</th>
-                                            <th>Residency Number</th>
-                                            <th>Checkout Orders</th>
-                                            @if (auth()->user()->role == 'admin')
-                                                <th>Action</th>
-                                            @endif
+                                            <th>Email</th>
+                                            <th>Role</th>
+                                            <th>Checkouts</th>
+                                            <th>Returns</th>
+                                            <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($clients as $client)
+                                        @foreach ($users as $user)
                                             <tr>
-                                                <td>{{ $client->name }}</td>
-                                                <td>{{ $client->mobile }}</td>
-                                                <td>{{ $client->residency_number }}</td>
+                                                <td>{{ $user->name }}</td>
+                                                <td>{{ $user->email }}</td>
+                                                <td>{{ $user->role }}</td>
                                                 <td>
-                                                    @foreach ($client->checkouts as $checkout)
+                                                    @foreach ($user->checkouts as $checkout)
                                                         <a href="{{ route('checkouts.show', $checkout->id) }}">
                                                             <div class="badge badge-info">
                                                                 Checkout ID: {{ $checkout->id }}
@@ -59,15 +56,26 @@
                                                         </a>
                                                     @endforeach
                                                 </td>
-                                                @if (auth()->user()->role == 'admin')
-                                                    <td>
-                                                        <a href="{{ route('clients.edit', $client->id) }}"
-                                                            class="btn btn-primary"><i class="fas fa-pencil-alt"></i></a>
-                                                        <a href="{{ route('clients.destroy', $client->id) }}"
-                                                            class="btn btn-danger delete-item"><i
-                                                                class="fas fa-trash"></i></a>
-                                                    </td>
-                                                @endif
+                                                <td>
+                                                    @foreach ($user->returnedCheckouts as $returned)
+                                                        <a href="{{ route('checkouts.show', $returned->id) }}">
+                                                            <div class="badge badge-info">
+                                                                Checkout ID: {{ $returned->id }}
+                                                                <br>
+                                                                @foreach ($returned->items as $item)
+                                                                    {{ $item->name }} ({{ $item->pivot->quantity }}),
+                                                                @endforeach
+                                                            </div>
+                                                        </a>
+                                                    @endforeach
+                                                </td>
+
+                                                <td>
+                                                    <a href="{{ route('users.edit', $user->id) }}"
+                                                        class="btn btn-primary"><i class="fas fa-pencil-alt"></i></a>
+                                                    <a href="{{ route('users.destroy', $user->id) }}"
+                                                        class="btn btn-danger delete-item"><i class="fas fa-trash"></i></a>
+                                                </td>
                                             </tr>
                                         @endforeach
                                     </tbody>

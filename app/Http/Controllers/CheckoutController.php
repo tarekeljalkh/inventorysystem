@@ -7,6 +7,7 @@ use App\Models\Client;
 use App\Models\Item;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CheckoutController extends Controller
 {
@@ -85,6 +86,11 @@ class CheckoutController extends Controller
 
         // Update the return date
         $checkout->return_date = Carbon::now();
+
+        // Record the ID of the authenticated user who is returning the items
+        $checkout->returned_by_user_id = Auth::id(); // Ensure Auth facade is used
+
+
         $checkout->save();
 
         return to_route('checkouts.index')->with('success', 'Checkout returned to stock successfully.');

@@ -21,7 +21,7 @@
                                     wire:click="addToCart({{ $item['id'] }})">
                                     <!-- Center the image by making it block level and using mx-auto for auto margins on both sides -->
                                     <img style="width:50px; display: block; margin: 0 auto;"
-                                        src="{{ asset($item['image'] ?? 'default-product-image.png') }}"
+                                        src="{{ $item['image'] ? asset($item['image']) : asset('uploads/no_image.png') }}"
                                         class="card-img-top" alt="{{ $item['name'] }}">
                                     <!-- Use text-center class to center the text content within the card-body -->
                                     <div class="card-body text-center">

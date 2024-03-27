@@ -12,8 +12,13 @@
                     href="{{ route('dashboard') }}"><i class="fas fa-fire"></i>
                     <span>Dashboard</span></a></li>
 
+            @if (auth()->user()->role == 'admin')
+                <li class="{{ request()->routeIs('users.index') ? 'active' : '' }}"><a class="nav-link"
+                        href="{{ route('users.index') }}"><i class="fas fa-users"></i>
+                        <span>Users</span></a></li>
+            @endif
 
-            <li class="menu-header">Starter</li>
+            <li class="menu-header">System Control</li>
 
             {{-- <li class="dropdown">
                 <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i

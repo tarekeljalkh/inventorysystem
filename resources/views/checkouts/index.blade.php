@@ -31,6 +31,7 @@
                                         <tr>
                                             <th>Checkout ID</th>
                                             <th>Client Name</th>
+                                            <th>Checkout By</th>
                                             <th>Date</th>
                                             <th>Items Count</th>
                                             <th>Action</th>
@@ -41,6 +42,7 @@
                                             <tr>
                                                 <td>{{ $checkout->id }}</td>
                                                 <td>{{ $checkout->client->name }}</td>
+                                                <td>{{ $checkout->user->name }}</td>
                                                 <td>{{ $checkout->created_at->format('d-m-Y') }}</td>
                                                 <td>
                                                     @foreach ($checkout->items as $item)

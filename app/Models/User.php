@@ -42,4 +42,14 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function checkouts()
+    {
+        return $this->hasMany(Checkout::class);
+    }
+
+    public function returnedCheckouts()
+    {
+        return $this->hasMany(Checkout::class, 'returned_by_user_id');
+    }
 }
