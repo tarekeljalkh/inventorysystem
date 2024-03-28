@@ -22,16 +22,24 @@
                             <h4>All Items ({{ $items->count() }})</h4>
                             <div class="card-header-action">
                                 @if (auth()->user()->role == 'admin')
+                                    <a href="{{ route('items.create') }}" class="btn btn-success">Create New <i
+                                            class="fas fa-plus"></i></a>
 
-                                <a href="{{ route('items.create') }}" class="btn btn-success">Create New <i
-                                        class="fas fa-plus"></i></a>
-
-                                <a href="{{ route('items.import.index') }}" class="btn btn-info">Import Excel <i
-                                        class="fas fa-upload"></i></a>
-                                    @endif
+                                    <a href="{{ route('items.import.index') }}" class="btn btn-info">Import Excel <i
+                                            class="fas fa-upload"></i></a>
+                                @endif
                             </div>
                         </div>
                         <div class="card-body">
+                            <div class="mb-3">
+                                <label for="category_filter" class="form-label">Filter by Category:</label>
+                                <select id="category_filter" class="form-select">
+                                    <option value="">All Categories</option>
+                                    @foreach($categories as $category)
+                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                             <div class="table-responsive">
                                 <table id="items" class="display nowrap" style="width:100%">
                                     <thead>
@@ -47,7 +55,7 @@
                                     </thead>
                                     <tbody>
                                         @foreach ($items as $item)
-                                            <tr>
+                                            <tr data-category-id="{{ $item->category_id }}">
                                                 <td>{{ $item->name }}</td>
                                                 <td>{{ $item->quantity }}</td>
                                                 <td>{{ $item->category->name }}</td>
@@ -82,6 +90,33 @@
 
 @push('scripts')
     <script>
+        $(document).ready(function () {
+            $('#category_filter').change(function () {
+                var categoryId = $(this).val();
+
+                $('#items tbody tr').each(function () {
+                    if (categoryId === '' || $(this).data('category-id') == categoryId) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            });
+
+            new DataTable('#items', {
+                layout: {
+                    topStart: {
+                        buttons: ['excel', 'pdf', 'print']
+                    }
+                }
+            });
+        });
+    </script>
+@endpush
+
+{{--
+@push('scripts')
+    <script>
         new DataTable('#items', {
             layout: {
                 topStart: {
@@ -90,4 +125,4 @@
             }
         });
     </script>
-@endpush
+@endpush --}}

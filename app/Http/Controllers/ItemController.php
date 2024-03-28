@@ -19,7 +19,8 @@ class ItemController extends Controller
     public function index()
     {
         $items = Item::all();
-        return view('items.index', compact('items'));
+        $categories = Category::all();
+        return view('items.index', compact('items', 'categories'));
     }
 
     public function importIndex()
