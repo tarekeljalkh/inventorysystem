@@ -17,11 +17,24 @@ class ItemsSeeder extends Seeder
             [
                 'name' => 'speaker Bose',
                 'quantity' => '10',
+                'category_id' => '2'
             ],
             [
                 'name' => 'stage',
                 'quantity' => '2',
+                'category_id' => '1'
             ],
+            [
+                'name' => 'item3',
+                'quantity' => '2',
+                'category_id' => '1'
+            ],
+            [
+                'name' => 'item4',
+                'quantity' => '2',
+                'category_id' => '2'
+            ],
+
         ]);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Imports\ItemsImport;
+use App\Models\Category;
 use App\Models\Item;
 use App\Traits\FileUploadTrait;
 use Illuminate\Http\Request;
@@ -44,7 +45,8 @@ class ItemController extends Controller
      */
     public function create()
     {
-        return view('items.create');
+        $categories = Category::all();
+        return view('items.create', compact('categories'));
     }
 
     /**
@@ -57,6 +59,7 @@ class ItemController extends Controller
             'image' => ['nullable', 'image', 'mimes:png,jpg'],
             'name' => ['string', 'max:200'],
             'quantity' => ['nullable', 'numeric', 'min:0'],
+            'category_id' => ['required', 'numeric'],
         ]);
 
         //handle Image Upload
@@ -65,6 +68,7 @@ class ItemController extends Controller
         $item = new Item();
         $item->name = $request->name;
         $item->quantity = $request->quantity;
+        $item->category_id = $request->category_id;
         $item->image = $imagePath;
         $item->save();
 
@@ -88,7 +92,8 @@ class ItemController extends Controller
     public function edit(string $id)
     {
         $item = Item::findOrFail($id);
-        return view('items.edit', compact('item'));
+        $categories = Category::all();
+        return view('items.edit', compact('item', ('categories')));
     }
 
     /**
@@ -110,6 +115,7 @@ class ItemController extends Controller
         // Update item
         $item->name = $request->name;
         $item->quantity = $request->quantity;
+        $item->category_id = $request->category_id;
         $item->image = !empty($imagePath) ? $imagePath : $item->image;
         $item->save();
 

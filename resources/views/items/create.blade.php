@@ -20,8 +20,8 @@
                 {{-- Items Section --}}
                 <div class="col-12 col-md-12 col-lg-12">
                     <div class="card">
-                        <form action="{{ route('items.store') }}" method="post" class="needs-validation"
-                            novalidate="" enctype="multipart/form-data">
+                        <form action="{{ route('items.store') }}" method="post" class="needs-validation" novalidate=""
+                            enctype="multipart/form-data">
                             @csrf
 
                             <div class="card-header">
@@ -51,6 +51,15 @@
                                         <input type="number" name="quantity" class="form-control" required="">
                                     </div>
 
+                                    <div class="form-group col-md-12 col-12">
+                                        <label>Category</label>
+                                        <select name="category_id" class="form-control select2">
+                                            @foreach ($categories as $category)
+                                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
                                 </div>
 
                             </div>
@@ -68,12 +77,12 @@
 @endsection
 
 @push('scripts')
-<script>
-    $(document).ready(function(){
-        $('image-preview').css({
-            'background-size': 'cover',
-            'background-position': 'center center'
+    <script>
+        $(document).ready(function() {
+            $('image-preview').css({
+                'background-size': 'cover',
+                'background-position': 'center center'
+            })
         })
-    })
     </script>
 @endpush

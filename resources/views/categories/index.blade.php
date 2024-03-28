@@ -6,10 +6,10 @@
             <div class="section-header-back">
                 <a href="{{ route('dashboard') }}" class="btn btn-icon"><i class="fas fa-arrow-left"></i></a>
             </div>
-            <h1>Items ({{ $items->count() }})</h1>
+            <h1>Categories ({{ $categories->count() }})</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="{{ route('dashboard') }}">Dashboard</a></div>
-                <div class="breadcrumb-item"><a href="#">Items</a></div>
+                <div class="breadcrumb-item"><a href="#">Categories</a></div>
             </div>
         </div>
 
@@ -19,50 +19,35 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
-                            <h4>All Items ({{ $items->count() }})</h4>
+                            <h4>All Categories ({{ $categories->count() }})</h4>
                             <div class="card-header-action">
                                 @if (auth()->user()->role == 'admin')
 
-                                <a href="{{ route('items.create') }}" class="btn btn-success">Create New <i
+                                <a href="{{ route('categories.create') }}" class="btn btn-success">Create New <i
                                         class="fas fa-plus"></i></a>
-
-                                <a href="{{ route('items.import.index') }}" class="btn btn-info">Import Excel <i
-                                        class="fas fa-upload"></i></a>
                                     @endif
                             </div>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table id="items" class="display nowrap" style="width:100%">
+                                <table id="categories" class="display nowrap" style="width:100%">
                                     <thead>
                                         <tr>
                                             <th>Name</th>
-                                            <th>Quantity</th>
-                                            <th>Category</th>
-                                            <th>Image</th>
                                             @if (auth()->user()->role == 'admin')
                                                 <th>Action</th>
                                             @endif
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($items as $item)
+                                        @foreach ($categories as $category)
                                             <tr>
-                                                <td>{{ $item->name }}</td>
-                                                <td>{{ $item->quantity }}</td>
-                                                <td>{{ $item->category->name }}</td>
-                                                <td>
-                                                    @if ($item->image)
-                                                        <img style="width: 50px" src="{{ asset($item->image) }}">
-                                                    @else
-                                                        <img style="width: 50px" src="{{ asset('uploads/no_image.png') }}">
-                                                    @endif
-                                                </td>
+                                                <td>{{ $category->name }}</td>
                                                 @if (auth()->user()->role == 'admin')
                                                     <td>
-                                                        <a href="{{ route('items.edit', $item->id) }}"
+                                                        <a href="{{ route('categories.edit', $category->id) }}"
                                                             class="btn btn-primary"><i class="fas fa-pencil-alt"></i></a>
-                                                        <a href="{{ route('items.destroy', $item->id) }}"
+                                                        <a href="{{ route('categories.destroy', $category->id) }}"
                                                             class="btn btn-danger delete-item"><i
                                                                 class="fas fa-trash"></i></a>
                                                     </td>
@@ -82,7 +67,7 @@
 
 @push('scripts')
     <script>
-        new DataTable('#items', {
+        new DataTable('#categories', {
             layout: {
                 topStart: {
                     buttons: ['excel', 'pdf', 'print']

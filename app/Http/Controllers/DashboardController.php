@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Checkout;
 use App\Models\Client;
 use App\Models\Item;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -14,11 +16,13 @@ class DashboardController extends Controller
      */
     public function index()
     {
+        $categories = Category::all()->count();
         $items = Item::all()->count();
+        $users = User::all()->count();
         $clients = Client::all()->count();
         $checkouts = Checkout::notReturnedToStock()->count();
         $reports = Checkout::all()->count();
-        return view('dashboard', compact('items', 'clients', 'checkouts', 'reports'));
+        return view('dashboard', compact('categories', 'items', 'users', 'clients', 'checkouts', 'reports'));
     }
 
     /**

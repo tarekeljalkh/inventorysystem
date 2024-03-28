@@ -26,7 +26,7 @@
                             @csrf
 
                             <div class="card-header">
-                                <h4>Edit Doctor</h4>
+                                <h4>Edit Item</h4>
                             </div>
                             <div class="card-body">
 
@@ -53,6 +53,16 @@
                                         <input type="number" name="quantity" class="form-control"
                                             value="{{ $item->quantity }}" required="">
                                     </div>
+
+                                    <div class="form-group col-md-12 col-12">
+                                        <label>Category</label>
+                                        <select name="category_id" class="form-control select2">
+                                            @foreach ($categories as $category)
+                                                <option @selected($item->category->id === $category->id) value="{{ $category->id }}">{{ $category->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
 
                                 </div>
 

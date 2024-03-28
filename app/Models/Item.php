@@ -15,4 +15,10 @@ class Item extends Model
     {
         return $this->hasMany(Checkout::class);
     }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'category_id');
+    }
+
 }

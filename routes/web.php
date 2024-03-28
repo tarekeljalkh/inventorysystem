@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
@@ -28,6 +29,9 @@ Route::middleware('auth')->group(function () {
 
     //Dashboard route
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    //Categories route
+    Route::resource('categories', CategoryController::class);
 
     //items route
     Route::get('/import-items', [ItemController::class, 'importIndex'])->name('items.import.index');

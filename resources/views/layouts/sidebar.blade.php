@@ -30,6 +30,10 @@
                 </ul>
             </li> --}}
 
+            <li class="{{ request()->routeIs('categories.index') ? 'active' : '' }}"><a class="nav-link"
+                href="{{ route('categories.index') }}"><i class="fas fa-inbox"></i>
+                <span>Categories</span></a></li>
+
             <li class="{{ request()->routeIs('items.index') ? 'active' : '' }}"><a class="nav-link"
                     href="{{ route('items.index') }}"><i class="fas fa-sitemap"></i>
                     <span>Items</span></a></li>
