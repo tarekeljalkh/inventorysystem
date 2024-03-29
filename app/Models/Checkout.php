@@ -18,8 +18,10 @@ class Checkout extends Model
 
     public function items()
     {
-        return $this->belongsToMany(Item::class, 'checkout_items')->withPivot('quantity');
+        return $this->belongsToMany(Item::class, 'checkout_items')
+                    ->withPivot('quantity', 'returned_quantity', 'notes');
     }
+
 
     public function user()
     {

@@ -16,8 +16,11 @@ class CheckoutController extends Controller
      */
     public function index()
     {
-        //$checkouts = Checkout::all();
-        $checkouts = Checkout::notReturnedToStock()->get();
+        // Fetch checkouts where not all items have been fully returned and include the user who returned the checkout
+        $checkouts = Checkout::with(['items', 'returnedBy'])->whereHas('items', function ($query) {
+            $query->havingRaw('SUM(checkout_items.quantity) > SUM(checkout_items.returned_quantity)');
+        }, '>', 0)->get();
+
         return view('checkouts.index', compact('checkouts'));
     }
 
@@ -78,23 +81,80 @@ class CheckoutController extends Controller
         }
     }
 
-    public function returnToStock(Checkout $checkout)
+    public function returnToStockPage($checkoutId)
     {
-        foreach ($checkout->items as $item) {
-            $item->increment('quantity', $item->pivot->quantity);
-        }
+        // Fetch the checkout and eager load the items with necessary pivot information.
+        $checkout = Checkout::with(['items' => function($query) {
+            // Assuming there's logic to only fetch relevant items.
+            $query->addSelect([
+                \DB::raw('items.*, checkout_items.quantity - checkout_items.returned_quantity AS remaining_to_return')
+            ]);
+        }])->findOrFail($checkoutId);
 
-        // Update the return date
-        $checkout->return_date = Carbon::now();
-
-        // Record the ID of the authenticated user who is returning the items
-        $checkout->returned_by_user_id = Auth::id(); // Ensure Auth facade is used
-
-
-        $checkout->save();
-
-        return to_route('checkouts.index')->with('success', 'Checkout returned to stock successfully.');
+        return view('checkouts.return_to_stock', compact('checkout'));
     }
+
+    public function processReturn(Request $request, $checkoutId)
+    {
+        $data = $request->input('returns', []);
+        $checkout = Checkout::with('items')->findOrFail($checkoutId);
+
+        \DB::beginTransaction();
+
+        try {
+            foreach ($data as $itemId => $returnData) {
+                $returnQuantity = $returnData['quantity'] ?? 0;
+                $notes = $returnData['notes'] ?? '';
+
+                if ($returnQuantity > 0) {
+                    // Find the specific item in the checkout
+                    $checkoutItem = $checkout->items()->where('item_id', $itemId)->first();
+
+                    if ($checkoutItem) {
+                        // Update the returned quantity in the pivot table
+                        $currentReturnedQuantity = $checkoutItem->pivot->returned_quantity + $returnQuantity;
+                        $checkout->items()->updateExistingPivot($itemId, [
+                            'returned_quantity' => $currentReturnedQuantity,
+                            'notes' => $notes
+                        ]);
+
+                        // Update the item's stock in the inventory
+                        $item = Item::find($itemId);
+                        $item->increment('quantity', $returnQuantity);
+                    }
+                }
+            }
+
+            $checkout->return_date = now();
+            $checkout->returned_by_user_id = Auth::id();
+            $checkout->save();
+
+            \DB::commit();
+            return redirect()->route('checkouts.index')->with('success', 'Items returned to stock successfully with notes.');
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return back()->withErrors('error', $e->getMessage());
+        }
+    }
+
+
+    // public function returnToStock(Checkout $checkout)
+    // {
+    //     foreach ($checkout->items as $item) {
+    //         $item->increment('quantity', $item->pivot->quantity);
+    //     }
+
+    //     // Update the return date
+    //     $checkout->return_date = Carbon::now();
+
+    //     // Record the ID of the authenticated user who is returning the items
+    //     $checkout->returned_by_user_id = Auth::id(); // Ensure Auth facade is used
+
+
+    //     $checkout->save();
+
+    //     return to_route('checkouts.index')->with('success', 'Checkout returned to stock successfully.');
+    // }
 
 
     /**

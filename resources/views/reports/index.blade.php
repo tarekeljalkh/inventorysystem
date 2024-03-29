@@ -73,7 +73,7 @@
                                                 @endforeach
                                             </td>
                                             <td>{{ $checkout->created_at->format('d-m-Y') }}</td>
-                                            <td>{{ $checkout->return_date ? $checkout->returnedBy->name : '' }}</td>
+                                            <td>{{ $checkout->returnedBy ? $checkout->returnedBy->name : 'Not Returned Yet' }}</td> <!-- Display the name of the user who returned the item -->
                                             <td>{{ $checkout->return_date ? Carbon\Carbon::parse($checkout->return_date)->format('d-m-Y') : 'Not Returned Yet' }}</td>
                                             <td>
                                                 <a href="{{ route('checkouts.show', $checkout->id) }}" class="btn btn-info"><i class="fas fa-eye"></i> View</a>

@@ -13,27 +13,26 @@ class ReportController extends Controller
      */
     public function index(Request $request)
     {
-        $checkouts = Checkout::query();
+        $query = Checkout::with(['client', 'user', 'items']);
 
-        // Filter by date range
-        if ($request->filled('start_date')) {
-            $checkouts->whereDate('created_at', '>=', $request->start_date);
+        if ($request->has('start_date') && $request->start_date) {
+            $query->whereDate('created_at', '>=', $request->start_date);
         }
 
-        if ($request->filled('end_date')) {
-            $checkouts->whereDate('created_at', '<=', $request->end_date);
+        if ($request->has('end_date') && $request->end_date) {
+            $query->whereDate('created_at', '<=', $request->end_date);
         }
 
-        // Check if a specific client is selected, otherwise show all
-        if ($request->filled('client_id')) {
-            $checkouts->where('client_id', $request->client_id);
+        if ($request->has('client_id') && $request->client_id) {
+            $query->where('client_id', $request->client_id);
         }
 
-        $filteredCheckouts = $checkouts->get();
-        $clients = Client::all();
+        $filteredCheckouts = $query->get();
+        $clients = Client::all(); // Assuming you have a Client model
 
         return view('reports.index', compact('filteredCheckouts', 'clients'));
     }
+
 
     /**
      * Show the form for creating a new resource.

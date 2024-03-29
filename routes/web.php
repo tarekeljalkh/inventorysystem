@@ -33,6 +33,7 @@ Route::middleware('auth')->group(function () {
     //Categories route
     Route::resource('categories', CategoryController::class);
 
+
     //items route
     Route::get('/import-items', [ItemController::class, 'importIndex'])->name('items.import.index');
     Route::post('/import-items', [ItemController::class, 'import'])->name('items.import');
@@ -48,7 +49,9 @@ Route::middleware('auth')->group(function () {
 
 
     //Checkout route
-    Route::post('checkouts/{checkout}/return-to-stock', [CheckoutController::class, 'returnToStock'])->name('return_to_stock');
+    //Route::post('checkouts/{checkout}/return-to-stock', [CheckoutController::class, 'returnToStock'])->name('return_to_stock');
+    Route::get('/checkouts/{checkout}/return', [CheckoutController::class, 'returnToStockPage'])->name('checkouts.return');
+    Route::post('/checkouts/{checkout}/process-return', [CheckoutController::class, 'processReturn'])->name('checkouts.process_return');
     Route::resource('checkouts', CheckoutController::class);
 
     //Report route

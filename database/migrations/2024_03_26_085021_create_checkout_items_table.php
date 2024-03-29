@@ -15,7 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('checkout_id')->constrained();
             $table->foreignId('item_id')->constrained();
+            $table->text('notes')->nullable(); // Adding a nullable notes column
             $table->integer('quantity');
+            $table->integer('returned_quantity')->default(0);
             $table->timestamps();
         });
     }

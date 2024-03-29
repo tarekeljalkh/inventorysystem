@@ -53,12 +53,15 @@
                                                 <td>
                                                     <a href="{{ route('checkouts.show', $checkout->id) }}"
                                                         class="btn btn-info"><i class="fas fa-eye"></i> View</a>
-                                                    <form action="{{ route('return_to_stock', $checkout->id) }}"
+                                                    {{-- <form action="{{ route('return_to_stock', $checkout->id) }}"
                                                         method="POST" style="display:inline-block;">
                                                         @csrf
                                                         <button type="submit"
                                                             class="btn btn-warning return-to-stock">Return to Stock</button>
-                                                    </form>
+                                                    </form> --}}
+
+                                                    <a href="{{ route('checkouts.return', $checkout->id) }}" class="btn btn-warning">Return to Stock</a>
+
                                                 </td>
                                             </tr>
                                         @endforeach
