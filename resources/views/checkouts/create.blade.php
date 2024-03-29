@@ -1,4 +1,7 @@
 @extends('layouts.master')
+@push('css')
+    @livewireStyles
+@endpush
 
 @section('content')
     <section class="section">
@@ -22,3 +25,6 @@
         </div>
     </section>
 @endsection
+@push('scripts')
+    @livewireScripts
+@endpush

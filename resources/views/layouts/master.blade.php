@@ -47,6 +47,8 @@
 
     {{-- Added for pusher real time --}}
     @vite(['resources/js/app.js'])
+
+    @stack('css')
 </head>
 
 <body>
