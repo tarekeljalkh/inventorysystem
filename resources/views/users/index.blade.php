@@ -32,8 +32,6 @@
                                             <th>Name</th>
                                             <th>Email</th>
                                             <th>Role</th>
-                                            <th>Checkouts</th>
-                                            <th>Returns</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -43,33 +41,6 @@
                                                 <td>{{ $user->name }}</td>
                                                 <td>{{ $user->email }}</td>
                                                 <td>{{ $user->role }}</td>
-                                                <td>
-                                                    @foreach ($user->checkouts as $checkout)
-                                                        <a href="{{ route('checkouts.show', $checkout->id) }}">
-                                                            <div class="badge badge-info">
-                                                                Checkout ID: {{ $checkout->id }}
-                                                                <br>
-                                                                @foreach ($checkout->items as $item)
-                                                                    {{ $item->name }} ({{ $item->pivot->quantity }}),
-                                                                @endforeach
-                                                            </div>
-                                                        </a>
-                                                    @endforeach
-                                                </td>
-                                                <td>
-                                                    @foreach ($user->returnedCheckouts as $returned)
-                                                        <a href="{{ route('checkouts.show', $returned->id) }}">
-                                                            <div class="badge badge-info">
-                                                                Checkout ID: {{ $returned->id }}
-                                                                <br>
-                                                                @foreach ($returned->items as $item)
-                                                                    {{ $item->name }} ({{ $item->pivot->quantity }}),
-                                                                @endforeach
-                                                            </div>
-                                                        </a>
-                                                    @endforeach
-                                                </td>
-
                                                 <td>
                                                     <a href="{{ route('users.edit', $user->id) }}"
                                                         class="btn btn-primary"><i class="fas fa-pencil-alt"></i></a>
