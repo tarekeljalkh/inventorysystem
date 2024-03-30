@@ -61,6 +61,7 @@
                 </div>
                 <div class="card-footer">
                     <h5>Total: {{ count($cart) }} Items</h5>
+                    <input type="text" class="form-control mb-2" placeholder="Enter Checkout User Name" wire:model.defer="checkoutUser">
                     <div class="d-flex">
                         <select wire:model="selectedClient" class="form-control select2 mr-2" id="clientSelect">
                             <option value="" disabled>Select Client</option>

@@ -84,11 +84,7 @@
                 <hr>
                 <div class="text-md-right">
                     @if (!$checkout->return_date)
-                        <form action="{{ route('checkouts.return', $checkout->id) }}" method="POST"
-                            style="display:inline-block;">
-                            @csrf
-                            <button type="submit" class="btn btn-warning return-to-stock">Return to Stock</button>
-                        </form>
+                    <a href="{{ route('checkouts.return', $checkout->id) }}" class="btn btn-warning">Return to Stock</a>
                     @endif
 
                     <button class="btn btn-primary btn-icon icon-left" onclick="window.print()"><i class="fas fa-print"></i>

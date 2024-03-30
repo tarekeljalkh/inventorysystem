@@ -42,14 +42,22 @@
                                             <tr>
                                                 <td>{{ $checkout->id }}</td>
                                                 <td>{{ $checkout->client->name }}</td>
-                                                <td>{{ $checkout->user->name }}</td>
+                                                <td>{{ $checkout->checkout_user }}</td>
                                                 <td>{{ $checkout->created_at->format('d-m-Y') }}</td>
                                                 <td>
                                                     @foreach ($checkout->items as $item)
-                                                        <span class="badge badge-info">{{ $item->name }}
-                                                            ({{ $item->pivot->quantity }})</span>
+                                                    <div>
+                                                        {{ $item->name }}: {{ $item->pivot->quantity }} checked out
+                                                        @php
+                                                        $remaining = $item->pivot->quantity - ($item->pivot->returned_quantity ?? 0);
+                                                        @endphp
+                                                        <br>Remaining: {{ $remaining }}
+                                                        @if (!empty($item->pivot->notes))
+                                                        <br>Notes: {{ $item->pivot->notes }}
+                                                        @endif
+                                                    </div>
                                                     @endforeach
-                                                </td>
+                                                        </td>
                                                 <td>
                                                     <a href="{{ route('checkouts.show', $checkout->id) }}"
                                                         class="btn btn-info"><i class="fas fa-eye"></i> View</a>

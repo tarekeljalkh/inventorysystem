@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('checkouts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('client_id')->constrained();
-            $table->foreignId('user_id')->constrained('users');
-            $table->foreignId('returned_by_user_id')->nullable()->constrained('users');
+            $table->string('checkout_user');
+            $table->string('returned_by_user')->nullable();
             $table->timestamp('return_date')->nullable();
             $table->timestamps();
         });

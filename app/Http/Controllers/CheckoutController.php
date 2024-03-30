@@ -8,6 +8,7 @@ use App\Models\Item;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CheckoutController extends Controller
 {
@@ -84,7 +85,7 @@ class CheckoutController extends Controller
     public function returnToStockPage($checkoutId)
     {
         // Fetch the checkout and eager load the items with necessary pivot information.
-        $checkout = Checkout::with(['items' => function($query) {
+        $checkout = Checkout::with(['items' => function ($query) {
             // Assuming there's logic to only fetch relevant items.
             $query->addSelect([
                 \DB::raw('items.*, checkout_items.quantity - checkout_items.returned_quantity AS remaining_to_return')
@@ -97,9 +98,11 @@ class CheckoutController extends Controller
     public function processReturn(Request $request, $checkoutId)
     {
         $data = $request->input('returns', []);
+        // Assuming 'returned_by' is the name of the input field in your form
+        $returnedBy = $request->input('returned_by', '');
         $checkout = Checkout::with('items')->findOrFail($checkoutId);
 
-        \DB::beginTransaction();
+        DB::beginTransaction();
 
         try {
             foreach ($data as $itemId => $returnData) {
@@ -115,27 +118,32 @@ class CheckoutController extends Controller
                         $currentReturnedQuantity = $checkoutItem->pivot->returned_quantity + $returnQuantity;
                         $checkout->items()->updateExistingPivot($itemId, [
                             'returned_quantity' => $currentReturnedQuantity,
-                            'notes' => $notes
+                            // Assume you want to concatenate new notes with any existing ones
+                            'notes' => trim($checkoutItem->pivot->notes . ' ' . $notes)
                         ]);
 
-                        // Update the item's stock in the inventory
-                        $item = Item::find($itemId);
-                        $item->increment('quantity', $returnQuantity);
+                        // Skip updating the item's stock in the inventory
+                        // This means the original quantity of items will remain unchanged
                     }
                 }
             }
 
             $checkout->return_date = now();
-            $checkout->returned_by_user_id = Auth::id();
+            // Here, adjust the logic based on how you want to store the "Returned By" information
+            // If storing a name or identifier instead of a user ID, ensure your database schema supports it
+            $checkout->returned_by_user = $returnedBy; // Make sure you have this column in your database
+
             $checkout->save();
 
-            \DB::commit();
-            return redirect()->route('checkouts.index')->with('success', 'Items returned to stock successfully with notes.');
+            DB::commit();
+            return redirect()->route('checkouts.index')->with('success', 'Return processed successfully.');
         } catch (\Exception $e) {
-            \DB::rollBack();
+            DB::rollBack();
             return back()->withErrors('error', $e->getMessage());
         }
     }
+
+
 
 
     // public function returnToStock(Checkout $checkout)

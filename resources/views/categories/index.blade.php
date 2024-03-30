@@ -45,6 +45,9 @@
                                                 <td>{{ $category->name }}</td>
                                                 @if (auth()->user()->role == 'admin')
                                                     <td>
+                                                        <a href="{{ route('categories.show', $category->id) }}"
+                                                            class="btn btn-success"><i class="fas fa-eye"></i></a>
+
                                                         <a href="{{ route('categories.edit', $category->id) }}"
                                                             class="btn btn-primary"><i class="fas fa-pencil-alt"></i></a>
                                                         <a href="{{ route('categories.destroy', $category->id) }}"
