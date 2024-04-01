@@ -35,7 +35,7 @@
                                 <label for="category_filter" class="form-label">Filter by Category:</label>
                                 <select id="category_filter" class="form-select">
                                     <option value="">All Categories</option>
-                                    @foreach($categories as $category)
+                                    @foreach ($categories as $category)
                                         <option value="{{ $category->id }}">{{ $category->name }}</option>
                                     @endforeach
                                 </select>
@@ -90,11 +90,11 @@
 
 @push('scripts')
     <script>
-        $(document).ready(function () {
-            $('#category_filter').change(function () {
+        $(document).ready(function() {
+            // Category filter functionality
+            $('#category_filter').change(function() {
                 var categoryId = $(this).val();
-
-                $('#items tbody tr').each(function () {
+                $('#items tbody tr').each(function() {
                     if (categoryId === '' || $(this).data('category-id') == categoryId) {
                         $(this).show();
                     } else {
@@ -103,11 +103,34 @@
                 });
             });
 
-            new DataTable('#items', {
-                layout: {
-                    topStart: {
-                        buttons: ['excel', 'pdf', 'print']
-                    }
+            // DataTable initialization with explicit column definitions
+            var table = $('#items').DataTable({
+                dom: 'Bfrtip', // Defines the table control elements to appear on the page
+                buttons: [
+                    'excel', 'pdf', 'print'
+                ],
+                columnDefs: [{
+                        targets: [0, 1, 2, 3],
+                        sortable: true
+                    }, // Enable sorting on all columns except 'Action'
+                    {
+                        targets: [4],
+                        sortable: false,
+                        orderable: false
+                    } // Disables sorting on 'Action' column if present
+                ],
+                order: [
+                    [2, 'asc']
+                ] // Default sorting on the Category column
+            });
+
+            // Attach to the Excel button a pre-sorting functionality, if necessary
+            table.buttons().container().on('click', 'button', function() {
+                let button = table.button($(this).index());
+                if (button.node().className.indexOf('buttons-excel') !== -1) {
+                    table.order([
+                        [2, 'asc']
+                    ]).draw();
                 }
             });
         });

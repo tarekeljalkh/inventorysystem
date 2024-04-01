@@ -18,7 +18,12 @@ class ItemController extends Controller
      */
     public function index()
     {
-        $items = Item::all();
+        // $items = Item::all();
+        // $categories = Category::all();
+        // return view('items.index', compact('items', 'categories'));
+
+        // Assuming 'category' is the relationship name in your Item model to the Category model
+        $items = Item::with('category')->get()->sortBy('category.name');
         $categories = Category::all();
         return view('items.index', compact('items', 'categories'));
     }
