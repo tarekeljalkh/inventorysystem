@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Livewire;
 
 use App\Models\Checkout;
@@ -15,62 +16,107 @@ class PointOfSale extends Component
     public $search = '';
     public $selectedClient = 1; // Default selection for the client select box
     public $checkoutUser = ''; // Placeholder for the checkout user name
+    public $quantities = [];
+    public $removalQuantities = [];
 
     public function mount()
     {
-        $this->items = Item::where('quantity', '>', 0)->get()->toArray();
+        // Initialize items and clients in mount() without filtering
+        $this->initializeItemsAndClients();
     }
+
+    private function initializeItemsAndClients()
+    {
+        $this->items = Item::where('quantity', '>', 0)->get()->toArray();
+        foreach ($this->cart as $item) {
+            $this->removalQuantities[$item['id']] = 0;
+        }
+        $clients = $this->loadClients();
+        if ($clients->isNotEmpty()) {
+            $this->selectedClient = $clients->last()->id;
+        }
+    }
+
+
 
     public function addToCart($itemId)
     {
-        $key = array_search($itemId, array_column($this->items, 'id'));
-        if ($key !== false) {
-            $item = &$this->items[$key];
+        // Find the item directly without relying on previously stored keys
+        $item = collect($this->items)->firstWhere('id', $itemId);
 
-            if ($item['quantity'] > 0) {
-                if (isset($this->cart[$itemId])) {
-                    $this->cart[$itemId]['quantity']++;
-                } else {
-                    $this->cart[$itemId] = [
-                        'id' => $item['id'],
-                        'name' => $item['name'],
-                        'quantity' => 1
-                    ];
-                }
+        if ($item && $item['quantity'] > 0) {
+            $quantity = $this->quantities[$itemId] ?? 1;
 
-                // No actual decrement here, just visually for the user interface
-                $item['quantity']--;
+            // Update the cart
+            if (isset($this->cart[$itemId])) {
+                $this->cart[$itemId]['quantity'] += $quantity;
+            } else {
+                $this->cart[$itemId] = [
+                    'id' => $itemId,
+                    'name' => $item['name'],
+                    'quantity' => $quantity,
+                ];
+            }
+
+            // Update the item's quantity in the original list
+            // This requires re-filtering or adjusting the $this->items array accordingly
+            $this->updateItemQuantity($itemId, -$quantity);
+
+            // Reset the input for next addition
+            $this->quantities[$itemId] = 1;
+        } else {
+            // Handle the case where the item cannot be found or has insufficient quantity
+            session()->flash('error', 'Item cannot be added to the cart.');
+        }
+    }
+
+    private function updateItemQuantity($itemId, $change)
+    {
+        // Adjust the quantity in $this->items
+        foreach ($this->items as $key => $item) {
+            if ($item['id'] === $itemId && isset($item['quantity'])) {
+                $this->items[$key]['quantity'] += $change;
+                break;
             }
         }
-
-        $this->render();
     }
+
 
     public function removeFromCart($itemId)
     {
         if (isset($this->cart[$itemId])) {
-            $this->cart[$itemId]['quantity']--;
+            // Use the specified quantity to remove, defaulting to 1 if not specified
+            $removeQuantity = $this->removalQuantities[$itemId] ?? 1;
 
+            // Decrement the cart item's quantity by the specified removal quantity
+            $this->cart[$itemId]['quantity'] -= $removeQuantity;
+
+            // If the quantity drops to 0 or less, remove the item from the cart
             if ($this->cart[$itemId]['quantity'] <= 0) {
                 unset($this->cart[$itemId]);
             }
 
-            // No actual increment here, just visually for the user interface
+            // Optionally, you might want to increment the available quantity of the item
+            // This line assumes you're tracking available quantities in `$this->items`
             $key = array_search($itemId, array_column($this->items, 'id'));
             if ($key !== false) {
-                $this->items[$key]['quantity']++;
+                $this->items[$key]['quantity'] += $removeQuantity;
             }
+
+            // Reset the removal quantity to 1 for future operations
+            $this->removalQuantities[$itemId] = 1;
 
             $this->render();
         }
     }
+
 
     public function checkout()
     {
         $this->validate([
             'selectedClient' => 'required|exists:clients,id',
             'cart' => 'required|array',
-            'checkoutUser' => 'required|string', // Validate checkoutUser
+            'checkoutUser' => 'required|string',
         ]);
 
         DB::beginTransaction();
@@ -97,6 +143,7 @@ class PointOfSale extends Component
 
     public function updateSearch()
     {
+
         $this->render();
     }
 
@@ -107,13 +154,17 @@ class PointOfSale extends Component
 
     public function render()
     {
-        $items = collect($this->items);
+        // Always call initializeItemsAndClients to refresh items before filtering
+        $this->initializeItemsAndClients();
+
+        // Filter items based on search term
         if (!empty($this->search)) {
-            $items = $items->filter(function ($item) {
+            $this->items = collect($this->items)->filter(function ($item) {
                 return stripos($item['name'], $this->search) !== false;
-            });
+            })->toArray();
         }
 
-        return view('livewire.point-of-sale', ['items' => $items]);
+        return view('livewire.point-of-sale', ['items' => $this->items]);
     }
+
 }
