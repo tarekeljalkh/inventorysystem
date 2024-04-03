@@ -31,6 +31,8 @@
                             </div>
                         </div>
                         <div class="card-body">
+                            @if (auth()->user()->role == 'admin')
+
                             <div class="mb-3">
                                 <label for="category_filter" class="form-label">Filter by Category:</label>
                                 <select id="category_filter" class="form-select">
@@ -40,6 +42,7 @@
                                     @endforeach
                                 </select>
                             </div>
+                            @endif
                             <div class="table-responsive">
                                 <table id="items" class="display nowrap" style="width:100%">
                                     <thead>
@@ -89,6 +92,8 @@
 @endsection
 
 @push('scripts')
+@if (auth()->user()->role == 'admin')
+
     <script>
         $(document).ready(function() {
             // Category filter functionality
@@ -135,6 +140,19 @@
             });
         });
     </script>
+
+    @else
+    <script>
+        new DataTable('#items', {
+            layout: {
+                topStart: {
+                    buttons: ['excel', 'pdf', 'print']
+                }
+            }
+        });
+    </script>
+
+    @endif
 @endpush
 
 {{--
