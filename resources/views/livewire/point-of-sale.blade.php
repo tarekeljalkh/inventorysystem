@@ -5,6 +5,13 @@
             <input type="text" class="form-control" placeholder="Search Items..." wire:model.defer="search"
                 wire:keydown="updateSearch">
         </div>
+        @if (session()->has('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+
+    @if (session()->has('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
 
         <!-- Product Grid -->
         <div class="col-md-9"> <!-- Adjusted from col-md-8 to col-md-9 for 3/4 width -->
@@ -16,21 +23,21 @@
                     <div class="row">
 
                         @foreach ($items as $item)
-                            <div class="col-md-3 mb-4">
-                                <div class="card h-100" style="cursor: pointer;"
-                                    wire:click="addToCart({{ $item['id'] }})">
-                                    <!-- Center the image by making it block level and using mx-auto for auto margins on both sides -->
-                                    <img style="width:50px; display: block; margin: 0 auto;"
-                                        src="{{ $item['image'] ? asset($item['image']) : asset('uploads/no_image.png') }}"
-                                        class="card-img-top" alt="{{ $item['name'] }}">
-                                    <!-- Use text-center class to center the text content within the card-body -->
-                                    <div class="card-body text-center">
-                                        <h5 class="card-title">{{ $item['name'] }}</h5>
-                                        <p>{{ $item['quantity'] }} Available</p>
-                                    </div>
+                        <div class="col-md-3 mb-4" wire:key="item-{{ $item['id'] }}">
+
+                            <div class="card h-100">
+                                <img style="width:50px; display: block; margin: 0 auto;"
+                                    src="{{ $item['image'] ? asset($item['image']) : asset('uploads/no_image.png') }}"
+                                    alt="{{ $item['name'] }}">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">{{ $item['name'] }}</h5>
+                                    <p>{{ $item['quantity'] }} Available</p>
+                                    <input type="number" wire:model="quantities.{{ $item['id'] }}" class="form-control mb-2" placeholder="Qty" min="1" max="{{ $item['quantity'] }}">
+                                    <button class="btn btn-primary" wire:click="addToCart({{ $item['id'] }})">Add to Cart</button>
                                 </div>
                             </div>
-                        @endforeach
+                        </div>
+                    @endforeach
 
                     </div>
                 </div>
@@ -47,14 +54,15 @@
                     @if (count($cart) > 0)
                         <ul class="list-group list-group-flush">
                             @foreach ($cart as $item)
-                                <li class="list-group-item">
-                                    {{ $item['name'] }}
-                                    <span class="badge badge-primary badge-pill">{{ $item['quantity'] }}</span>
-                                    <button class="btn btn-sm btn-danger"
-                                        wire:click="removeFromCart({{ $item['id'] }})">-</button>
-                                </li>
-                            @endforeach
-                        </ul>
+                            <li class="list-group-item">
+                                {{ $item['name'] }}
+                                <span class="badge badge-primary badge-pill">{{ $item['quantity'] }}</span>
+                                <input type="number" wire:model="removalQuantities.{{ $item['id'] }}" class="form-control mb-2" style="width: 60px;" placeholder="Qty" min="1" max="{{ $item['quantity'] }}">
+                                <button class="btn btn-sm btn-danger" wire:click="removeFromCart({{ $item['id'] }})">-</button>
+                                <!-- Add a new button to remove the specified quantity -->
+                                <button class="btn btn-sm btn-warning" wire:click="removeFromCart({{ $item['id'] }})">Remove Specified Quantity</button>
+                            </li>
+                            @endforeach                        </ul>
                     @else
                         <p>Your cart is empty.</p>
                     @endif
@@ -64,7 +72,6 @@
                     <input type="text" class="form-control mb-2" placeholder="Enter Checkout User Name" wire:model.defer="checkoutUser">
                     <div class="d-flex">
                         <select wire:model="selectedClient" class="form-control select2 mr-2" id="clientSelect">
-                            <option value="" disabled>Select Client</option>
                             @foreach ($this->loadClients() as $client)
                                 <option value="{{ $client->id }}">{{ $client->name }}</option>
                             @endforeach
