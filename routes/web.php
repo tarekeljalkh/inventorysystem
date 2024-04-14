@@ -37,6 +37,8 @@ Route::middleware('auth')->group(function () {
     //items route
     Route::get('/import-items', [ItemController::class, 'importIndex'])->name('items.import.index');
     Route::post('/import-items', [ItemController::class, 'import'])->name('items.import');
+    Route::get('/export-categories-items', [ItemController::class, 'exportCategoriesItems'])->name('categories.items.export');
+
     // Route::post('/items/return', 'InventoryController@returnItem');
     Route::resource('items', ItemController::class);
 

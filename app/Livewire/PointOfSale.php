@@ -41,41 +41,39 @@ class PointOfSale extends Component
 
     public function addToCart($itemId)
     {
-        // Find the item directly without relying on previously stored keys
         $item = collect($this->items)->firstWhere('id', $itemId);
+        if (!$item) {
+            session()->flash('error', 'Item not found.');
+            return;
+        }
 
-        if ($item && $item['quantity'] > 0) {
-            $quantity = $this->quantities[$itemId] ?? 1;
+        // Calculate available quantity ensuring integer types
+        $availableQuantity = (int) $item['quantity'] - (int) $item['out_quantity'];
+        $quantityToAdd = (int) ($this->quantities[$itemId] ?? 1);
 
-            // Update the cart
+        if ($availableQuantity > 0 && $quantityToAdd <= $availableQuantity) {
             if (isset($this->cart[$itemId])) {
-                $this->cart[$itemId]['quantity'] += $quantity;
+                $this->cart[$itemId]['quantity'] += $quantityToAdd;
             } else {
                 $this->cart[$itemId] = [
                     'id' => $itemId,
                     'name' => $item['name'],
-                    'quantity' => $quantity,
+                    'quantity' => $quantityToAdd,
                 ];
             }
 
-            // Update the item's quantity in the original list
-            // This requires re-filtering or adjusting the $this->items array accordingly
-            $this->updateItemQuantity($itemId, -$quantity);
-
-            // Reset the input for next addition
-            $this->quantities[$itemId] = 1;
+            $this->updateItemQuantity($itemId, $quantityToAdd);
         } else {
-            // Handle the case where the item cannot be found or has insufficient quantity
-            session()->flash('error', 'Item cannot be added to the cart.');
+            session()->flash('error', 'Not enough stock available to add this quantity.');
         }
     }
 
     private function updateItemQuantity($itemId, $change)
     {
-        // Adjust the quantity in $this->items
         foreach ($this->items as $key => $item) {
-            if ($item['id'] === $itemId && isset($item['quantity'])) {
-                $this->items[$key]['quantity'] += $change;
+            if ($item['id'] === $itemId) {
+                // Ensure integer operation
+                $this->items[$key]['out_quantity'] += (int) $change;
                 break;
             }
         }
@@ -84,31 +82,27 @@ class PointOfSale extends Component
 
     public function removeFromCart($itemId)
     {
-        if (isset($this->cart[$itemId])) {
-            // Use the specified quantity to remove, defaulting to 1 if not specified
-            $removeQuantity = $this->removalQuantities[$itemId] ?? 1;
-
-            // Decrement the cart item's quantity by the specified removal quantity
-            $this->cart[$itemId]['quantity'] -= $removeQuantity;
-
-            // If the quantity drops to 0 or less, remove the item from the cart
-            if ($this->cart[$itemId]['quantity'] <= 0) {
-                unset($this->cart[$itemId]);
-            }
-
-            // Optionally, you might want to increment the available quantity of the item
-            // This line assumes you're tracking available quantities in `$this->items`
-            $key = array_search($itemId, array_column($this->items, 'id'));
-            if ($key !== false) {
-                $this->items[$key]['quantity'] += $removeQuantity;
-            }
-
-            // Reset the removal quantity to 1 for future operations
-            $this->removalQuantities[$itemId] = 1;
-
-            $this->render();
+        if (!isset($this->cart[$itemId])) {
+            session()->flash('error', 'Item not in cart.');
+            return;
         }
+
+        $removeQuantity = (int) ($this->removalQuantities[$itemId] ?? 1);
+        $this->cart[$itemId]['quantity'] -= $removeQuantity;
+
+        if ($this->cart[$itemId]['quantity'] <= 0) {
+            unset($this->cart[$itemId]);
+        }
+
+        $key = array_search($itemId, array_column($this->items, 'id'));
+        if ($key !== false) {
+            $this->items[$key]['quantity'] += $removeQuantity;
+        }
+
+        $this->removalQuantities[$itemId] = 1;
+        $this->render();
     }
+
 
 
     public function checkout()
@@ -120,26 +114,37 @@ class PointOfSale extends Component
         ]);
 
         DB::beginTransaction();
-
         try {
+            foreach ($this->cart as $item_id => $cartItem) {
+                $item = Item::find($item_id);
+                $availableQuantity = $item->quantity - $item->out_quantity;
+
+                if ($cartItem['quantity'] > $availableQuantity) {
+                    session()->flash('error', 'Checkout failed: Not enough stock available for item ' . $item->name);
+                    DB::rollBack();
+                    return;
+                }
+            }
+
             $checkout = new Checkout();
             $checkout->client_id = $this->selectedClient;
-            $checkout->checkout_user = $this->checkoutUser; // Set the checkout user
+            $checkout->checkout_user = $this->checkoutUser;
             $checkout->save();
 
             foreach ($this->cart as $item_id => $cartItem) {
-                // Attach item to checkout without modifying item quantity
                 $checkout->items()->attach($item_id, ['quantity' => $cartItem['quantity']]);
+                Item::find($item_id)->increment('out_quantity', $cartItem['quantity']);
             }
 
             DB::commit();
+            session()->flash('success', 'Checkout successful.');
             $this->reset(['cart', 'selectedClient', 'checkoutUser']);
-            toastr()->success('Checkout successful.');
         } catch (Exception $e) {
             DB::rollBack();
             toastr()->error('Checkout failed: ' . $e->getMessage());
         }
     }
+
 
     public function updateSearch()
     {

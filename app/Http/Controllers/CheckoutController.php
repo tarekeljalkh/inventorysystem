@@ -95,10 +95,15 @@ class CheckoutController extends Controller
         return view('checkouts.return_to_stock', compact('checkout'));
     }
 
+
     public function processReturn(Request $request, $checkoutId)
     {
+
+        $data = $request->validate([
+            'returned_by' => 'required|string',
+        ]);
+
         $data = $request->input('returns', []);
-        // Assuming 'returned_by' is the name of the input field in your form
         $returnedBy = $request->input('returned_by', '');
         $checkout = Checkout::with('items')->findOrFail($checkoutId);
 
@@ -110,29 +115,26 @@ class CheckoutController extends Controller
                 $notes = $returnData['notes'] ?? '';
 
                 if ($returnQuantity > 0) {
-                    // Find the specific item in the checkout
                     $checkoutItem = $checkout->items()->where('item_id', $itemId)->first();
-
                     if ($checkoutItem) {
                         // Update the returned quantity in the pivot table
                         $currentReturnedQuantity = $checkoutItem->pivot->returned_quantity + $returnQuantity;
                         $checkout->items()->updateExistingPivot($itemId, [
                             'returned_quantity' => $currentReturnedQuantity,
-                            // Assume you want to concatenate new notes with any existing ones
                             'notes' => trim($checkoutItem->pivot->notes . ' ' . $notes)
                         ]);
 
-                        // Skip updating the item's stock in the inventory
-                        // This means the original quantity of items will remain unchanged
+                        // Decrement the out_quantity from the item's stock
+                        $item = Item::find($itemId);
+                        if ($item) {
+                            $item->decrement('out_quantity', $returnQuantity);
+                        }
                     }
                 }
             }
 
             $checkout->return_date = now();
-            // Here, adjust the logic based on how you want to store the "Returned By" information
-            // If storing a name or identifier instead of a user ID, ensure your database schema supports it
-            $checkout->returned_by_user = $returnedBy; // Make sure you have this column in your database
-
+            $checkout->returned_by_user = $returnedBy;  // Assuming you have this column in your database
             $checkout->save();
 
             DB::commit();

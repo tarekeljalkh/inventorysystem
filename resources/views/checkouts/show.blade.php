@@ -85,12 +85,14 @@
                                     <tr>
                                         <th data-width="40">#</th>
                                         <th>Item</th>
+                                        <th>Image</th>
                                         <th class="text-center">Quantity</th>
                                     </tr>
                                     @foreach ($checkout->items as $index => $item)
                                         <tr>
                                             <td>{{ $index + 1 }}</td>
                                             <td>{{ $item->name }}</td>
+                                            <td><img style="width: 100px" src="{{ $item->image }}" alt="{{ $item->name }}"></td>
                                             <td class="text-center">{{ $item->pivot->quantity }}</td>
                                         </tr>
                                     @endforeach

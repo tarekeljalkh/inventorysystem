@@ -24,22 +24,21 @@
 
                         @foreach ($items as $item)
                         <div class="col-md-3 mb-4" wire:key="item-{{ $item['id'] }}">
-
                             <div class="card h-100">
                                 <img style="width:50px; display: block; margin: 0 auto;"
                                     src="{{ $item['image'] ? asset($item['image']) : asset('uploads/no_image.png') }}"
                                     alt="{{ $item['name'] }}">
                                 <div class="card-body text-center">
                                     <h5 class="card-title">{{ $item['name'] }}</h5>
-                                    <p>{{ $item['quantity'] }} Available</p>
+                                    <p>{{ $item['quantity'] }} in Stock</p>
+                                    <p>{{ $item['out_quantity'] }} Checked Out</p>
                                     <input type="number" wire:model="quantities.{{ $item['id'] }}" class="form-control mb-2" placeholder="Qty" min="1" max="{{ $item['quantity'] }}">
                                     <button class="btn btn-primary" wire:click="addToCart({{ $item['id'] }})">Add to Cart</button>
                                 </div>
                             </div>
                         </div>
-                    @endforeach
-
-                    </div>
+                        @endforeach
+                            </div>
                 </div>
             </div>
         </div>

@@ -8,6 +8,7 @@ use App\Models\Item;
 use App\Traits\FileUploadTrait;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\CategoriesItemsExport;
 
 class ItemController extends Controller
 {
@@ -129,6 +130,12 @@ class ItemController extends Controller
         // Redirect or return a response
         return to_route('items.index');
     }
+
+    public function exportCategoriesItems()
+{
+    return Excel::download(new CategoriesItemsExport, 'categories_items.xlsx');
+}
+
 
     /**
      * Remove the specified resource from storage.

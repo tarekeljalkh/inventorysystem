@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('items', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->integer('quantity');
+            $table->integer('quantity'); // This remains as the stock quantity
+            $table->integer('out_quantity')->default(0); // New field to track checked-out quantities
             $table->foreignId('category_id')->constrained();
             $table->string('image')->nullable();
             $table->timestamps();
